@@ -16,20 +16,8 @@ use Symfony\Component\Filesystem\Filesystem;
 
 (function () {
     $require = true;
-    if (class_exists('Phar')) {
-        // Maybe this file is used as phar-stub? Let's try!
-        try {
-            Phar::mapPhar('php-cs-fixer.phar');
-
-            require_once 'phar://php-cs-fixer.phar/vendor/autoload.php';
-            $require = false;
-        } catch (PharException $e) {
-        }
-    }
-
     if ($require) {
-        // OK, it's not, let give Composer autoloader a try!
-        $possibleFiles = ['vender/composer/autoload.php', 'vender/composer/autoload.php', 'vendor/autoload.php'];
+        $possibleFiles = [PHPUNIT_ADAPTOR_BASE_PATH . '/vender/composer/autoload.php', PHPUNIT_ADAPTOR_BASE_PATH . '/vender/composer/autoload.php', PHPUNIT_ADAPTOR_BASE_PATH . '/vendor/autoload.php'];
         $file = null;
         foreach ($possibleFiles as $possibleFile) {
             if (file_exists($possibleFile)) {
