@@ -4,7 +4,10 @@
   "license": "MIT",
   "keywords": [
     "php",
-    "hyperf"
+    "hyperf",
+    "doctrine",
+    "swoole",
+    "swow"
   ],
   "description": "",
   "autoload": {
@@ -19,7 +22,6 @@
   },
   "require": {
     "php": ">=8.0",
-    "ext-pdo": "*",
     "doctrine/orm": "^2.15.0",
     "hyperf/cache": "~3.0.0",
     "hyperf/config": "~3.0.0",
@@ -39,7 +41,7 @@
     "symfony/var-dumper": "^6.0"
   },
   "suggest": {
-    "swow/swow": "Required to create swow components."
+    "ext-pdo": "Required to use MySQL Client."
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -48,7 +50,7 @@
     "sort-packages": true
   },
   "scripts": {
-    "test": "@php vendor/hyperf/testing/co-phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always",
+    "test": "@php tests/phpunit-adaptor",
     "analyse": "phpstan analyse --memory-limit 1024M -l 0 ./src",
     "cs-fix": "php-cs-fixer fix $1"
   },

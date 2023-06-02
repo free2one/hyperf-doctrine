@@ -1,0 +1,157 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+use Composer\InstalledVersions;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
+
+! defined('PHPUNIT_ADAPTOR_BASE_PATH') && define('PHPUNIT_ADAPTOR_BASE_PATH', dirname(__DIR__, 1));
+
+(function () {
+    $require = true;
+    if (class_exists('Phar')) {
+        // Maybe this file is used as phar-stub? Let's try!
+        try {
+            Phar::mapPhar('php-cs-fixer.phar');
+
+            require_once 'phar://php-cs-fixer.phar/vendor/autoload.php';
+            $require = false;
+        } catch (PharException $e) {
+        }
+    }
+
+    if ($require) {
+        // OK, it's not, let give Composer autoloader a try!
+        $possibleFiles = ['vender/composer/autoload.php', 'vender/composer/autoload.php', 'vendor/autoload.php'];
+        $file = null;
+        foreach ($possibleFiles as $possibleFile) {
+            if (file_exists($possibleFile)) {
+                $file = $possibleFile;
+                break;
+            }
+        }
+
+        if ($file === null) {
+            throw new RuntimeException('Unable to locate autoload.php file.');
+        }
+
+        require_once $file;
+    }
+})();
+
+class PhpunitAdaptorCommand extends Command
+{
+    protected static $defaultName = 'run';
+
+    protected function configure(): void
+    {
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        if (extension_loaded('swoole')) {
+            $swooleEngine = 'hyperf/engine';
+            if (! InstalledVersions::isInstalled($swooleEngine) || ! InstalledVersions::getReference($swooleEngine)) {
+                if (! $this->reinstall($io, $swooleEngine, [
+                    fn () => $this->deleteComposerFiles($io),
+                    fn () => $this->composerInstall($io),
+                ])) {
+                    return self::FAILURE;
+                }
+            }
+
+            passthru('php vendor/hyperf/testing/co-phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always');
+        } elseif (extension_loaded('swow')) {
+            $swowEngine = 'hyperf/engine-swow';
+            if (! InstalledVersions::isInstalled($swowEngine) || ! InstalledVersions::getReference($swowEngine)) {
+                if (! $this->reinstall($io, $swowEngine, [
+                    fn () => $this->deleteComposerFiles($io),
+                    fn () => $this->composerSafeRequire($io, $swowEngine),
+                ])) {
+                    return self::FAILURE;
+                }
+            }
+
+            passthru('php vendor/bin/phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always');
+        }
+
+        return self::SUCCESS;
+    }
+
+    private function reinstall(SymfonyStyle $io, string $package, array $steps): bool
+    {
+        $question = new ChoiceQuestion(
+            '检测到你已开启Swoole/Swow扩展,但未安装对应的' . $package . '组件,是否重新为你生成composr类库?',
+            ['N' => '否', 'Y' => '是'],
+            'N'
+        );
+        $answer = $io->askQuestion($question);
+        if ($answer == 'N') {
+            return false;
+        }
+
+        foreach ($steps as $step) {
+            if (! $step()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function deleteComposerFiles(SymfonyStyle $io): bool
+    {
+        $filesystem = new Filesystem();
+        $removeFiles = [PHPUNIT_ADAPTOR_BASE_PATH . '/composer.lock', PHPUNIT_ADAPTOR_BASE_PATH . '/vendor'];
+        $filesystem->remove($removeFiles);
+        $io->block('移除文件及目录: ' . implode(',', $removeFiles), null, 'fg=green');
+
+        return true;
+    }
+
+    private function composerSafeRequire(SymfonyStyle $io, $package): bool
+    {
+        $filesystem = new Filesystem();
+        $filesystem->copy(PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json', PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json.bak');
+        $command = 'cd ' . PHPUNIT_ADAPTOR_BASE_PATH . ' && composer require ' . $package;
+        $io->block('执行命令: ' . $command, null, 'fg=green');
+        passthru($command, $resultCode);
+
+        $filesystem->remove(PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json');
+        $filesystem->rename(PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json.bak', PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json');
+
+        if ($resultCode !== 0) {
+            $io->error('命令执行失败');
+            return false;
+        }
+
+        return true;
+    }
+
+    private function composerInstall(SymfonyStyle $io): bool
+    {
+        $command = 'cd ' . PHPUNIT_ADAPTOR_BASE_PATH . ' && composer install';
+        $io->block('执行命令: ' . $command, null, 'fg=green');
+        passthru($command, $resultCode);
+        if ($resultCode !== 0) {
+            $io->error('命令执行失败');
+            return false;
+        }
+
+        return true;
+    }
+}
+
+$app = new Application();
+$app->add(new PhpunitAdaptorCommand());
+$input = new ArrayInput(['command' => 'run']);
+
+$app->run($input);
