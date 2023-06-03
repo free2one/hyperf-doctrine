@@ -50,7 +50,7 @@
     "sort-packages": true
   },
   "scripts": {
-    "test": "@php tests/phpunit-adaptor",
+    "test": "@php tests/phpunit-adaptor run",
     "analyse": "phpstan analyse --memory-limit 1024M -l 0 ./src",
     "cs-fix": "php-cs-fixer fix $1"
   },

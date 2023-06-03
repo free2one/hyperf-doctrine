@@ -39,7 +39,6 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
     public function exec(string $sql): int
     {
         try {
-            //            var_dump($sql);
             $result = $this->connection->getPdo()->exec($sql);
 
             assert($result !== false);
@@ -53,7 +52,6 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
     public function prepare(string $sql): StatementInterface
     {
         try {
-            //            var_dump($sql);
             $stmt = $this->connection->getPdo()->prepare($sql);
 
             assert($stmt instanceof PDOStatement);
@@ -67,7 +65,6 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
     public function query(string $sql): ResultInterface
     {
         try {
-            //            var_dump($sql);
             $stmt = $this->connection->getPdo()->prepare($sql);
             $stmt->execute();
             assert($stmt instanceof PDOStatement);
@@ -110,7 +107,6 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
 
     public function commit(): bool
     {
-        //        var_dump('commit');
         $this->connection->getPdo()->commit();
         return true;
     }
