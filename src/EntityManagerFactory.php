@@ -12,9 +12,11 @@ use Doctrine\ORM\ORMSetup;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
 use Hyperf\Contract\ConfigInterface;
+use Hyperf\Doctrine\EventManager\EventManager;
 use Hyperf\Doctrine\ORM\EntityManager;
 use Hyperf\Doctrine\ORM\EntityRepository;
 use Hyperf\Doctrine\ORM\Repository\CoRepositoryFactory;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use RuntimeException;
 
 class EntityManagerFactory
@@ -80,7 +82,11 @@ class EntityManagerFactory
 
     public static function createManager(Connection $conn, Configuration $config): EntityManager
     {
-        $doctrineEntityManager = new DoctrineEntityManager($conn, $config);
+        $doctrineEntityManager = new DoctrineEntityManager(
+            $conn,
+            $config,
+            new EventManager(ApplicationContext::getContainer()->get(EventDispatcherInterface::class))
+        );
         $em = new EntityManager($doctrineEntityManager);
         Context::set(static::getWrapKey($doctrineEntityManager), $em);
 

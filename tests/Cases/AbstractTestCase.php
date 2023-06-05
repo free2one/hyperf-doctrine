@@ -32,7 +32,7 @@ abstract class AbstractTestCase extends TestCase
         DataTestHelper::truncateTable('user');
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
         self::getManager()->clear();
