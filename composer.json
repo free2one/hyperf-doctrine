@@ -9,7 +9,10 @@
     "swoole",
     "swow"
   ],
-  "description": "",
+  "authors": [
+    {"name": "free2one", "email": "free2someone@outlook.com"}
+  ],
+  "description": "Doctrine ORM for Hyperf framework",
   "autoload": {
     "psr-4": {
       "Hyperf\\Doctrine\\": "src/"
