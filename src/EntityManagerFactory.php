@@ -8,14 +8,11 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager as DoctrineEntityManager;
-use Doctrine\ORM\ORMSetup;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
-use Hyperf\Contract\ConfigInterface;
 use Hyperf\Doctrine\EventManager\EventManager;
 use Hyperf\Doctrine\ORM\EntityManager;
-use Hyperf\Doctrine\ORM\EntityRepository;
-use Hyperf\Doctrine\ORM\Repository\CoRepositoryFactory;
+use Hyperf\Doctrine\ORM\ORMSetup;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use RuntimeException;
 
@@ -35,36 +32,12 @@ class EntityManagerFactory
         }
 
         $poolName = $poolName ?: 'default';
-        $config = ApplicationContext::getContainer()->get(ConfigInterface::class);
-        $systemConfig = $config->get('doctrine-orm');
-        if (! isset($systemConfig[$poolName])) {
-            throw new RuntimeException('Hyperf-Doctrine-ORM cannot find the configuration');
-        }
-
-        $configurationConfig = $systemConfig[$poolName]['configuration'];
-        $connectionConfig = $systemConfig[$poolName]['connection'];
-        $cache = (isset($configurationConfig['cache']) && $configurationConfig['cache'])
-            ? ApplicationContext::getContainer()->make($configurationConfig['cache']['class'], $configurationConfig['cache']['constructor']) : null;
-        $configuration = ORMSetup::createAttributeMetadataConfiguration(
-            paths: $configurationConfig['paths'],
-            isDevMode: $configurationConfig['isDevMode'],
-            proxyDir: $configurationConfig['proxyDir'],
-            cache: $cache
-        );
-        $configuration->setRepositoryFactory(new CoRepositoryFactory());
-        $configuration->setDefaultRepositoryClassName(EntityRepository::class);
-        if (isset($configurationConfig['metadataCache']) && $configurationConfig['metadataCache']) {
-            $configuration->setMetadataCache(ApplicationContext::getContainer()->make($configurationConfig['metadataCache']['class'], $configurationConfig['metadataCache']['constructor']));
-        }
-        if (isset($configurationConfig['queryCache']) && $configurationConfig['queryCache']) {
-            $configuration->setQueryCache(ApplicationContext::getContainer()->make($configurationConfig['queryCache']['class'], $configurationConfig['queryCache']['constructor']));
-        }
-        if (isset($configurationConfig['resultCache']) && $configurationConfig['resultCache']) {
-            $configuration->setResultCache(ApplicationContext::getContainer()->make($configurationConfig['resultCache']['class'], $configurationConfig['resultCache']['constructor']));
-        }
-
-        $connection = DriverManager::getConnection(params: $connectionConfig, config: $configuration);
+        $configuration = ORMSetup::create($poolName);
+        $connection = DriverManager::getConnection(params: ORMSetup::getConfig($poolName)['connection'], config: $configuration);
         $em = static::createManager($connection, $configuration);
+        ORMSetup::buildFilters($poolName, $configuration, $em);
+        ORMSetup::buildListeners($poolName, $em);
+
         Context::set(static::getManagerKey($poolName), $em);
 
         return $em;

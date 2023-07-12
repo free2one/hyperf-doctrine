@@ -20,10 +20,14 @@ return [
             'metadataCache' => null,
             'queryCache' => null,
             'resultCache' => null,
+            'filters' => [
+            ],
+            'listeners' => [
+            ],
         ],
         'connection' => [
-            'driverClass' => \Hyperf\Doctrine\DBAL\Driver\PDO\MySQL\HyperfDatabaseDriver::class,
-            'wrapperClass' => \Hyperf\Doctrine\DBAL\HyperfDatabaseConnection::class,
+            'driverClass' => Hyperf\Doctrine\DBAL\Driver\PDO\MySQL\HyperfDatabaseDriver::class,
+            'wrapperClass' => Hyperf\Doctrine\DBAL\HyperfDatabaseConnection::class,
             'pool' => 'default',
         ],
     ],

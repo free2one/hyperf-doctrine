@@ -41,7 +41,8 @@
     "phpstan/phpstan": "^1.0",
     "phpunit/phpunit": ">=7.0",
     "swoole/ide-helper": "^4.5",
-    "symfony/var-dumper": "^6.0"
+    "symfony/var-dumper": "^6.0",
+    "gedmo/doctrine-extensions": "^3.0"
   },
   "suggest": {
     "ext-pdo": "Required to use MySQL Client."

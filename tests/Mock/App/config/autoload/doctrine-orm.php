@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Gedmo\SoftDeleteable\SoftDeleteableListener;
+
 return [
     'default' => [
         'configuration' => [
@@ -20,10 +22,20 @@ return [
             'metadataCache' => null,
             'queryCache' => null,
             'resultCache' => null,
+            'filters' => [
+                [
+                    'name' => 'soft-deleteable',
+                    'className' => Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter::class,
+                    'enable' => true,
+                ],
+            ],
+            'listeners' => [
+                SoftDeleteableListener::class,
+            ],
         ],
         'connection' => [
-            'driverClass' => \Hyperf\Doctrine\DBAL\Driver\PDO\MySQL\HyperfDatabaseDriver::class,
-            'wrapperClass' => \Hyperf\Doctrine\DBAL\HyperfDatabaseConnection::class,
+            'driverClass' => Hyperf\Doctrine\DBAL\Driver\PDO\MySQL\HyperfDatabaseDriver::class,
+            'wrapperClass' => Hyperf\Doctrine\DBAL\HyperfDatabaseConnection::class,
             'pool' => 'default',
         ],
     ],

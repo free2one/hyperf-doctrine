@@ -17,7 +17,7 @@ class DataTestHelper
         $em = EntityManagerFactory::getManager();
         $em->clear();
 
-        $userTableData = include 'tests/Mock/TableData/' . $filename . '.php';
+        $userTableData = include BASE_MOCK_PATH . '/TableData/' . $filename . '.php';
         foreach ($userTableData['data'] as $row) {
             $em->getConnection()->insert($userTableData['table'], $row);
         }
