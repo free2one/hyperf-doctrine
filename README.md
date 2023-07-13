@@ -14,4 +14,4 @@ php bin/hyperf.php vendor:publish free2one/hyperf-doctrine
 
 ## Github Wiki
 
-* 中文文档 待补充
+* [中文文档](https://github.com/kkguan/hyperf-doctrine/wiki/入门)
