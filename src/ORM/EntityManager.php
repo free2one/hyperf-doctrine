@@ -6,6 +6,8 @@ namespace Hyperf\Doctrine\ORM;
 
 use Doctrine\ORM\Decorator\EntityManagerDecorator;
 use Doctrine\ORM\EntityRepository;
+use Hyperf\Doctrine\Query\Grammars\DqlGrammar;
+use Hyperf\Doctrine\Query\HyperfQueryBuilder;
 
 class EntityManager extends EntityManagerDecorator
 {
@@ -16,5 +18,10 @@ class EntityManager extends EntityManagerDecorator
     public function getRepository($className)
     {
         return $this->wrapped->getRepository($className);
+    }
+
+    public function createHyperfQueryBuilder(): HyperfQueryBuilder
+    {
+        return new HyperfQueryBuilder($this, $this->getConnection()->getHyperfConnection(), new DqlGrammar());
     }
 }

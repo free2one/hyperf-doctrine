@@ -27,9 +27,7 @@ class AdapterCommand extends Command
         $this->filesystem = new Filesystem();
     }
 
-    protected function configure(): void
-    {
-    }
+    protected function configure(): void {}
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

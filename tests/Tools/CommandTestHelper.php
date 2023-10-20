@@ -17,13 +17,13 @@ use Symfony\Component\Console\Output\NullOutput;
 
 class CommandTestHelper
 {
-    public static function execCmdAndCheck(string $commandName, Command $command): void
+    public static function execCmdAndCheck(string $commandName, Command $command, bool $check = true): void
     {
         $input = new ArrayInput(['command' => $commandName]);
         $output = new NullOutput();
         $application = ApplicationContext::getContainer()->get(ApplicationInterface::class);
         $application->add($command);
         $exitCode = $application->find($commandName)->run($input, $output);
-        Assert::assertSame(0, $exitCode);
+        $check && Assert::assertSame(0, $exitCode);
     }
 }

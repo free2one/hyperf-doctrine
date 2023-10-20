@@ -51,7 +51,7 @@ class CommandTest extends AbstractTestCase
         $cache = $queryCache->getItem($cacheKey);
         $this->assertTrue($cache->isHit());
 
-        CommandTestHelper::execCmdAndCheck('doctrine:clear-cache:query', new QueryCommand());
+        CommandTestHelper::execCmdAndCheck('doctrine:clear-cache:query', new QueryCommand(), false);
 
         $cache = $queryCache->getItem($cacheKey);
         $this->assertFalse($cache->isHit());

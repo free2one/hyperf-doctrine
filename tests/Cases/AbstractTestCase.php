@@ -30,6 +30,14 @@ abstract class AbstractTestCase extends TestCase
         );
 
         DataTestHelper::truncateTable('user');
+
+        self::getManager()->getConnection()->executeStatement(
+            "create table if not exists `sub`(
+                    id    int unsigned auto_increment primary key,
+                    value varchar(256) default '' not null);"
+        );
+
+        DataTestHelper::truncateTable('sub');
     }
 
     protected function tearDown(): void
