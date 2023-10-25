@@ -61,7 +61,7 @@ class AdapterCommand extends Command
                 'extension' => 'swoole',
                 'package' => 'hyperf/engine',
                 'operations' => [
-                    fn () => $this->deleteComposerFiles(),
+//                    fn () => $this->deleteComposerFiles(),
                     fn () => $this->composerInstall(),
                 ],
                 'testCommand' => 'php vendor/hyperf/testing/co-phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always',
@@ -70,7 +70,7 @@ class AdapterCommand extends Command
                 'extension' => 'swow',
                 'package' => 'hyperf/engine-swow',
                 'operations' => [
-                    fn () => $this->deleteComposerFiles(),
+//                    fn () => $this->deleteComposerFiles(),
                     fn ($package) => $this->composerSafeRequire($package),
                 ],
                 'testCommand' => 'php vendor/bin/phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always',
@@ -121,7 +121,11 @@ class AdapterCommand extends Command
     private function composerSafeRequire($package): bool
     {
         $this->filesystem->copy(PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json', PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json.bak');
-        $command = 'cd ' . PHPUNIT_ADAPTOR_BASE_PATH . ' && composer require ' . $package;
+        $file = file_get_contents(PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json');
+        $composerContent = json_decode($file, true);
+        $composerContent['require'][$package] = '*';
+        $this->filesystem->dumpFile(PHPUNIT_ADAPTOR_BASE_PATH . '/composer.json', json_encode($composerContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $command = 'cd ' . PHPUNIT_ADAPTOR_BASE_PATH . ' && rm -rf ./vender/ && composer update';
         $this->io->block('执行命令: ' . $command, null, 'fg=green');
         passthru($command, $resultCode);
 
@@ -138,7 +142,7 @@ class AdapterCommand extends Command
 
     private function composerInstall(): bool
     {
-        $command = 'cd ' . PHPUNIT_ADAPTOR_BASE_PATH . ' && composer install';
+        $command = 'cd ' . PHPUNIT_ADAPTOR_BASE_PATH . ' && rm -rf ./vender/ && composer update';
         $this->io->block('执行命令: ' . $command, null, 'fg=green');
         passthru($command, $resultCode);
         if ($resultCode !== 0) {
