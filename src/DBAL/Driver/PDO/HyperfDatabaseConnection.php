@@ -13,12 +13,15 @@ use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\Deprecations\Deprecation;
 use Hyperf\Database\ConnectionInterface;
+use Hyperf\Database\DetectsLostConnections;
 use PDO;
 use PDOException;
 use PDOStatement;
 
 class HyperfDatabaseConnection implements ServerInfoAwareConnection
 {
+    use DetectsLostConnections;
+
     protected ConnectionInterface $connection;
 
     public function __construct(ConnectionInterface $connection)
@@ -40,26 +43,30 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
     {
         try {
             $result = $this->connection->getPdo()->exec($sql);
-
-            assert($result !== false);
-
-            return $result;
         } catch (PDOException $exception) {
-            throw Exception::new($exception);
+            $result = $this->retryIfCausedByLostConnection($exception, function () use ($sql) {
+                return $this->connection->getPdo()->exec($sql);
+            });
         }
+
+        assert($result !== false);
+
+        return $result;
     }
 
     public function prepare(string $sql): StatementInterface
     {
         try {
             $stmt = $this->connection->getPdo()->prepare($sql);
-
-            assert($stmt instanceof PDOStatement);
-
-            return new Statement($stmt);
         } catch (PDOException $exception) {
-            throw Exception::new($exception);
+            $stmt = $this->retryIfCausedByLostConnection($exception, function () use ($sql) {
+                return $this->connection->getPdo()->prepare($sql);
+            });
         }
+
+        assert($stmt instanceof PDOStatement);
+
+        return new Statement($stmt);
     }
 
     public function query(string $sql): ResultInterface
@@ -67,12 +74,17 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
         try {
             $stmt = $this->connection->getPdo()->prepare($sql);
             $stmt->execute();
-            assert($stmt instanceof PDOStatement);
-
-            return new Result($stmt);
         } catch (PDOException $exception) {
-            throw Exception::new($exception);
+            $stmt = $this->retryIfCausedByLostConnection($exception, function () use ($sql) {
+                $stmt = $this->connection->getPdo()->prepare($sql);
+                $stmt->execute();
+                return $stmt;
+            });
         }
+
+        assert($stmt instanceof PDOStatement);
+
+        return new Result($stmt);
     }
 
     public function quote($value, $type = ParameterType::STRING)
@@ -101,7 +113,14 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
 
     public function beginTransaction(): bool
     {
-        $this->connection->getPdo()->beginTransaction();
+        try {
+            $this->connection->getPdo()->beginTransaction();
+        } catch (PDOException $exception) {
+            $this->retryIfCausedByLostConnection($exception, function () {
+                $this->connection->getPdo()->beginTransaction();
+            });
+        }
+
         return true;
     }
 
@@ -113,7 +132,35 @@ class HyperfDatabaseConnection implements ServerInfoAwareConnection
 
     public function rollBack(): bool
     {
-        $this->connection->getPdo()->rollBack();
+        try {
+            $this->connection->getPdo()->rollBack();
+        } catch (PDOException $exception) {
+            $this->retryIfCausedByLostConnection($exception, function () {
+                $this->connection->getPdo()->rollBack();
+            });
+        }
+
         return true;
+    }
+
+    /**
+     * This method is used to retry a database operation if the failure was caused by a lost connection.
+     */
+    private function retryIfCausedByLostConnection(\Exception $exception, callable $callback): mixed
+    {
+        if (! $this->causedByLostConnection($exception)) {
+            if ($exception instanceof PDOException) {
+                throw Exception::new($exception);
+            }
+
+            throw $exception;
+        }
+
+        try {
+            $this->connection->reconnect();
+            return $callback();
+        } catch (PDOException $exception) {
+            throw Exception::new($exception);
+        }
     }
 }
