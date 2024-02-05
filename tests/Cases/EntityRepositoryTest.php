@@ -57,12 +57,12 @@ class EntityRepositoryTest extends AbstractTestCase
         );
     }
 
-    public function coroutineUpdateProvider(): array
+    public static function coroutineUpdateProvider(): array
     {
         return [
             [
                 function (AbstractUser $user) {
-                    return $this->getManager()->getRepository(User::class)->createQueryBuilder('user')
+                    return self::getManager()->getRepository(User::class)->createQueryBuilder('user')
                         ->where('user.userName = ?1')
                         ->setParameter(1, $user->getUserName())
                         ->getQuery()
@@ -72,7 +72,7 @@ class EntityRepositoryTest extends AbstractTestCase
             ],
             [
                 function (AbstractUser $user) {
-                    return $this->getManager()->getRepository(User::class)->matching(
+                    return self::getManager()->getRepository(User::class)->matching(
                         Criteria::create()
                             ->where(Criteria::expr()->eq('userName', $user->getUserName()))
                             ->setMaxResults(1)
@@ -82,23 +82,23 @@ class EntityRepositoryTest extends AbstractTestCase
             ],
             [
                 function (AbstractUser $user) {
-                    return $this->getManager()->getRepository(User::class)->find($user->getId());
+                    return self::getManager()->getRepository(User::class)->find($user->getId());
                 },
                 User::class,
             ],
             [
                 function (AbstractUser $user) {
-                    $users = $this->getManager()->getRepository(User::class)->findBy([
+                    $users = self::getManager()->getRepository(User::class)->findBy([
                         'userName' => $user->getUserName(),
                     ]);
-                    $this->assertCount(1, $users);
+                    self::assertCount(1, $users);
                     return array_pop($users);
                 },
                 User::class,
             ],
             [
                 function (AbstractUser $user) {
-                    return $this->getManager()->getRepository(User::class)->findOneBy([
+                    return self::getManager()->getRepository(User::class)->findOneBy([
                         'userName' => $user->getUserName(),
                     ]);
                 },

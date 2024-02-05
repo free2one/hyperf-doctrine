@@ -13,7 +13,7 @@ use Hyperf\Doctrine\Cache\CacheItemPool;
  */
 class CacheItemPoolTest extends AbstractTestCase
 {
-    public function configProvider(): array
+    public static function configProvider(): array
     {
         return [
             // Redis

@@ -403,19 +403,19 @@ class HyperfQueryBuilderTest extends AbstractTestCase
         $this->assertInstanceOf(Sub::class, $res->get(1));
     }
 
-    public function selectProvider(): array
+    public static function selectProvider(): array
     {
         return [
             [
                 function (AbstractUser $row) {
-                    $res = $this->getManager()->createHyperfQueryBuilder()
+                    $res = self::getManager()->createHyperfQueryBuilder()
                         ->select('user')
                         ->from(User::class, 'user')
                         ->where('user.userName', '=', $row->getUserName())
                         ->where('user.gender', '=', $row->getGender())
                         ->get();
 
-                    $this->assertCount(1, $res);
+                    self::assertCount(1, $res);
                     $data = $res->toArray();
                     return array_pop($data);
                 },
@@ -423,14 +423,14 @@ class HyperfQueryBuilderTest extends AbstractTestCase
             ],
             [
                 function (AbstractUser $row) {
-                    $res = $this->getManager()->createHyperfQueryBuilder()
+                    $res = self::getManager()->createHyperfQueryBuilder()
                         ->select('user.id, user.userName')
                         ->from(User::class, 'user')
                         ->where('user.userName', '=', $row->getUserName())
                         ->where('user.gender', '=', $row->getGender())
                         ->get();
 
-                    $this->assertCount(1, $res);
+                    self::assertCount(1, $res);
                     $data = $res->toArray();
                     return array_pop($data);
                 },

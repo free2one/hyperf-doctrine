@@ -26,7 +26,7 @@ class DoctrineQueryLanguageTest extends AbstractTestCase
         self::$users = DataTestHelper::initTableDataAndReturn('user', User::class);
     }
 
-    public function selectProvider(): array
+    public static function selectProvider(): array
     {
         return [
             [
@@ -38,7 +38,7 @@ class DoctrineQueryLanguageTest extends AbstractTestCase
                             2 => $row->getGender(),
                         ])
                         ->getResult();
-                    $this->assertCount(1, $res);
+                    self::assertCount(1, $res);
                     return array_pop($res);
                 },
                 null,
@@ -49,7 +49,7 @@ class DoctrineQueryLanguageTest extends AbstractTestCase
                         ->createQuery('SELECT user.id, user.userName FROM ' . User::class . ' user WHERE user.userName = ?1')
                         ->setParameter(1, $row->getUserName())
                         ->getResult();
-                    $this->assertCount(1, $res);
+                    self::assertCount(1, $res);
                     return array_pop($res);
                 },
                 function ($u1, $u2) {

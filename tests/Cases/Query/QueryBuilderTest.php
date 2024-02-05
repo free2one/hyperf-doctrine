@@ -24,7 +24,7 @@ use HyperfTest\Tools\UserTestHelper;
  */
 class QueryBuilderTest extends AbstractTestCase
 {
-    public function queryBuilderProvider(): array
+    public static function queryBuilderProvider(): array
     {
         return [
             [
@@ -58,7 +58,8 @@ class QueryBuilderTest extends AbstractTestCase
                             ->setParameter(2, $row->getGender())
                             ->getQuery()
                             ->getResult();
-                        $this->assertCount(1, $res);
+                        self::assertCount(1, $res);
+
                         return array_pop($res);
                     },
                     function (AbstractUser $row, $queryBuilder) {
@@ -75,7 +76,8 @@ class QueryBuilderTest extends AbstractTestCase
                             ->setParameter(2, $row->getGender())
                             ->getQuery()
                             ->getResult();
-                        $this->assertCount(1, $res);
+                        self::assertCount(1, $res);
+
                         return array_pop($res);
                     },
                     function (AbstractUser $row, $queryBuilder) {
@@ -96,7 +98,8 @@ class QueryBuilderTest extends AbstractTestCase
                             )
                             ->getQuery()
                             ->getResult();
-                        $this->assertCount(1, $res);
+                        self::assertCount(1, $res);
+
                         return array_pop($res);
                     },
                 ],

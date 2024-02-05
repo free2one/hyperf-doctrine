@@ -26,11 +26,11 @@
   "require": {
     "php": ">=8.0",
     "doctrine/orm": "^2.15.0",
-    "hyperf/cache": "~3.0.0",
-    "hyperf/config": "~3.0.0",
-    "hyperf/db-connection": "~3.0.0",
-    "hyperf/di": "~3.0.0",
-    "hyperf/framework": "~3.0.0"
+    "hyperf/cache": "^3.0",
+    "hyperf/config": "^3.0",
+    "hyperf/db-connection": "^3.0",
+    "hyperf/di": "^3.0",
+    "hyperf/framework": "^3.0"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.0",

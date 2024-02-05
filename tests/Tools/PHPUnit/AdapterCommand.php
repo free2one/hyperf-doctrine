@@ -61,19 +61,19 @@ class AdapterCommand extends Command
                 'extension' => 'swoole',
                 'package' => 'hyperf/engine',
                 'operations' => [
-//                    fn () => $this->deleteComposerFiles(),
+                    //                    fn () => $this->deleteComposerFiles(),
                     fn () => $this->composerInstall(),
                 ],
-                'testCommand' => 'php vendor/hyperf/testing/co-phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always',
+                'testCommand' => 'php vendor/hyperf/testing/co-phpunit --include-path test/bootstrap.php  --configuration phpunit.xml --colors=always',
             ],
             [
                 'extension' => 'swow',
                 'package' => 'hyperf/engine-swow',
                 'operations' => [
-//                    fn () => $this->deleteComposerFiles(),
+                    //                    fn () => $this->deleteComposerFiles(),
                     fn ($package) => $this->composerSafeRequire($package),
                 ],
-                'testCommand' => 'php vendor/bin/phpunit --prepend tests/bootstrap.php --configuration phpunit.xml --colors=always',
+                'testCommand' => 'php vendor/bin/phpunit  --include-path test/bootstrap.php --configuration phpunit.xml --colors=always',
             ],
         ];
     }

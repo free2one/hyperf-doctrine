@@ -9,6 +9,8 @@ use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
 use Hyperf\Doctrine\EntityManagerFactory;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 
 #[Command]
@@ -28,11 +30,26 @@ EOT
             );
     }
 
-    public function handle(): void
+    public function handle(): int
     {
         $command = new DoctrineMetadataCommand(
             new SingleManagerProvider(EntityManagerFactory::getManager())
         );
-        $command->execute($this->input, $this->output);
+        $params = [
+            'command' => 'orm:clear-cache:metadata',
+        ];
+        if ($this->input->getOption('em')) {
+            $params['--em'] = $this->input->getOption('em');
+        }
+        if ($this->input->getOption('flush')) {
+            $params['--flush'] = true;
+        }
+
+        $input = new ArrayInput($params);
+        $app = new Application();
+        $app->setAutoExit(false);
+        $app->add($command);
+
+        return $app->run($input);
     }
 }

@@ -37,13 +37,13 @@ class CustomRepositoryTest extends AbstractTestCase
         );
     }
 
-    public function coroutineUpdateProvider(): array
+    public static function coroutineUpdateProvider(): array
     {
         return [
             [
                 function (AbstractUser $user) {
                     $res = ApplicationContext::getContainer()->get(UserRepository::class)->findByUserName($user->getUserName());
-                    $this->assertCount(1, $res);
+                    self::assertCount(1, $res);
                     return array_pop($res);
                 },
                 UserWithRepository::class,
