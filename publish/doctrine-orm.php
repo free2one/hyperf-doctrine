@@ -1,6 +1,9 @@
 <?php
 
 declare(strict_types=1);
+use Hyperf\Doctrine\Cache\CacheItemPool;
+use Hyperf\Doctrine\DBAL\Driver\PDO\MySQL\HyperfDatabaseDriver;
+use Hyperf\Doctrine\DBAL\HyperfDatabaseConnection;
 
 return [
     'default' => [
@@ -9,7 +12,7 @@ return [
             'isDevMode' => false,
             'proxyDir' => BASE_PATH . '/runtime/doctrine-orm',
             'cache' => [
-                'class' => Hyperf\Doctrine\Cache\CacheItemPool::class,
+                'class' => CacheItemPool::class,
                 'constructor' => [
                     'config' => [
                         'driverName' => 'default',
@@ -24,10 +27,12 @@ return [
             ],
             'listeners' => [
             ],
+            'functions' => [
+            ],
         ],
         'connection' => [
-            'driverClass' => Hyperf\Doctrine\DBAL\Driver\PDO\MySQL\HyperfDatabaseDriver::class,
-            'wrapperClass' => Hyperf\Doctrine\DBAL\HyperfDatabaseConnection::class,
+            'driverClass' => HyperfDatabaseDriver::class,
+            'wrapperClass' => HyperfDatabaseConnection::class,
             'pool' => 'default',
         ],
     ],
