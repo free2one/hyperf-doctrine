@@ -37,6 +37,7 @@ class EntityManagerFactory
         $em = static::createManager($connection, $configuration);
         ORMSetup::buildFilters($poolName, $configuration, $em);
         ORMSetup::buildListeners($poolName, $em);
+        ORMSetup::buildCustomFunctions($poolName, $configuration);
 
         Context::set(static::getManagerKey($poolName), $em);
 

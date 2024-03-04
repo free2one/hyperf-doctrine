@@ -83,4 +83,26 @@ class ORMSetup
             $em->getEventManager()->addEventSubscriber($listenerObj);
         }
     }
+
+    public static function buildCustomFunctions(string $poolName, Configuration $configuration): void
+    {
+        $config = self::getConfig($poolName)['configuration'];
+
+        if (! isset($config['functions']) || ! is_array($config['functions'])) {
+            return;
+        }
+
+        foreach ($config['functions'] as $function) {
+            if (! isset($function['type'])) {
+                continue;
+            }
+
+            match ($function['type']) {
+                'string' => $configuration->addCustomStringFunction($function['name'], $function['className']),
+                'numeric' => $configuration->addCustomNumericFunction($function['name'], $function['className']),
+                'datetime' => $configuration->addCustomDatetimeFunction($function['name'], $function['className']),
+                default => null ,
+            };
+        }
+    }
 }
